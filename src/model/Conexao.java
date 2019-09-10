@@ -21,7 +21,7 @@ import javafx.scene.image.ImageView;
 public class Conexao {
 
     static final String driver = "org.h2.Driver"; //DRIVER DE CONEXÃO RESPONSÁVEL POR IDENTIFICAR O SERVIÇO DO BANCO DE DADOS
-    static final String caminho = "jdbc:h2:~/DatabaseLinksH2/Links"; //ENDEREÇO DO BD, RESPONSÁVEL POR SETAR O LOCAL DO BANCO DE DADOS
+    static final String caminho = "jdbc:h2:~/DatabaseH2/Links"; //ENDEREÇO DO BD, RESPONSÁVEL POR SETAR O LOCAL DO BANCO DE DADOS
     static final String usuario = "root"; //usuario do banco
     static final String senha = ""; //senha do banco
     private static Pessoa usuarioAtual = null;
@@ -403,5 +403,9 @@ public class Conexao {
      */
     public static void setContId(int aContId) {
         contId += aContId;
+    }
+    
+    public static void ZeraContId(){
+        contId = 0;
     }
 }

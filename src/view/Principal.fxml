@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -28,7 +29,7 @@
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TableView>
-            <Label alignment="CENTER" layoutX="67.0" layoutY="270.0" text="Enoque Teixeira Barbosa 2019 © Todos os direitos reservados." textAlignment="CENTER" textFill="WHITE" wrapText="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="270.0" AnchorPane.rightAnchor="270.0" />
+            <Label alignment="CENTER" layoutX="67.0" layoutY="270.0" text="Copyright © 2019 Enoque Teixeira Barbosa. Todos Os Direitos Reservados." textAlignment="CENTER" textFill="WHITE" wrapText="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="240.0" AnchorPane.rightAnchor="240.0" />
          </children>
       </AnchorPane>
    </bottom>
@@ -91,6 +92,11 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </ToggleButton>
+            <CheckBox fx:id="ckbAutomatico" layoutX="704.0" layoutY="16.0" mnemonicParsing="false" text="Adicionar Links Automatio" textFill="WHITE" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="15.0">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </CheckBox>
          </children>
       </AnchorPane>
    </center>

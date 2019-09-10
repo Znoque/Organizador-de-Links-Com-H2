@@ -11,10 +11,14 @@ import static controller.CadastroController.foiTerminada;
 import detectarcopiaby4java.DetectarCopiaBy4Java;
 import java.awt.Desktop;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
@@ -26,6 +30,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -41,8 +46,10 @@ import main.Principal;
 import model.Alerta;
 import model.Conexao;
 import model.Link;
+import model.Notificacao;
 import model.Pessoa;
 import model.TituloComparator;
+import model.TituloDoLink;
 
 /**
  * FXML Controller class
@@ -78,6 +85,8 @@ public class PrincipalController implements Initializable {
     private Button btnRemover;
     @FXML
     private ToggleButton tBtn;
+    @FXML
+    private CheckBox ckbAutomatico;
 
     public static Button adicionarPrincipal;
     public static Button removerPrincipal;
@@ -88,6 +97,10 @@ public class PrincipalController implements Initializable {
     DetectarCopiaBy4Java obj = new DetectarCopiaBy4Java();
     public static String copiado = "";
     public static String titulo = "";
+    public static boolean fecharT1 = false;
+    public static boolean selecionado = false;
+    TituloDoLink tituloLink = new TituloDoLink();
+    String titulotemp = "";
 
     /**
      * Initializes the controller class.
@@ -110,6 +123,7 @@ public class PrincipalController implements Initializable {
                 tBtn.setStyle("-fx-background-color: #FF8000;");
                 tvLinks.setItems(Conexao.getUsuarioAtual().getLinks());
             }
+            limpar();
         });
         
         carregarTabela(Conexao.getUsuarioAtual());
@@ -178,7 +192,51 @@ public class PrincipalController implements Initializable {
                 cont++;
             }
         }).start();
-
+        
+        Thread t1 = new Thread(() -> {
+            while (!fecharT1) {
+                try {
+                    if (ckbAutomatico.isSelected()) {
+                        selecionado = true;
+                        ckbAutomatico.setStyle("-fx-text-fill: #00ff00");
+                    } else {
+                        selecionado = false;
+                        ckbAutomatico.setStyle("-fx-text-fill: #ffffff");
+                    }
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t1.start();
+        
+        Thread auto = new Thread(() -> {
+            while (!fecharT1) {
+                try {
+                    if(selecionado){
+                        //System.out.println("selecionado");
+                        //ADICIONAR LINKS AUTOMÁTICAMENTE
+                        if (obj.detectar().contains("www") || obj.detectar().contains("https://") || obj.detectar().contains("http://")) {
+                            if (copiado.equals(obj.detectar())) {
+                                System.out.println("Já adicionado");
+                            } else {
+                                copiado = obj.detectar();
+                                titulotemp = tituloLink.pegarTitulo(obj.detectar());
+                                ImageView icone = pegarIcone(obj.detectar());
+                                Conexao.getLinksTemp().add(new Link(Conexao.getContId(), titulotemp, obj.detectar(), " ", " ", icone));
+                            }
+                        }
+                    } else{
+                        //System.out.println("Não Selecionado");
+                    }
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        auto.start();
     }
 
     public void carregarTabela(Pessoa p) {
@@ -188,6 +246,7 @@ public class PrincipalController implements Initializable {
         tcTag.setCellValueFactory(value -> value.getValue().getTag());
         tcIcon.setCellValueFactory(new PropertyValueFactory<>("icone"));
         Collections.sort(p.getLinks(), new TituloComparator());
+        Collections.sort(resultado, new TituloComparator());
         tvLinks.setItems(p.getLinks());
     }
 
@@ -216,6 +275,7 @@ public class PrincipalController implements Initializable {
 
     public void trocar() {
         Conexao.getLinksTemp().remove(0, Conexao.getLinksTemp().size());
+        Conexao.ZeraContId();
         Login m = new Login();
         try {
             m.start(new Stage());
@@ -234,6 +294,7 @@ public class PrincipalController implements Initializable {
         btnRemover.setDisable(true);
         btnAdicionar.setDisable(false);
         Collections.sort(Conexao.getUsuarioAtual().getLinks(), new TituloComparator());
+        Collections.sort(resultado, new TituloComparator());
     }
 
     public void cadastro(String s) {
@@ -329,5 +390,33 @@ public class PrincipalController implements Initializable {
      */
     public static ObservableList<Link> getResultado() {
         return resultado;
+    }
+    
+    public void pegarTitulo(String url) {
+        InputStream response = null;
+        Charset charset = Charset.forName("UTF8");
+        try {
+
+            URLConnection connection = new URL(url).openConnection();
+            connection.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
+            response = connection.getInputStream();
+
+            //connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+            Scanner scanner = new Scanner(response);
+            String responseBody = scanner.useDelimiter("\\A").next();
+            String titulo = responseBody.substring(responseBody.indexOf("<title") + responseBody.substring(responseBody.indexOf("<title")).indexOf(">"), responseBody.indexOf("</title>"));
+            titulotemp = titulo;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            titulotemp = "Erro ao pegar titulo automático";
+            //System.out.println("Não foi capaz de pegar o titulo");
+        } finally {
+            try {
+                response.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 }

@@ -84,7 +84,7 @@
       </GridPane>
       <CheckBox fx:id="cbTemp" layoutX="14.0" layoutY="358.0" mnemonicParsing="false" text="Temporário" textFill="WHITE" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="15.0">
          <font>
-            <Font size="16.0" />
+            <Font name="System Bold" size="16.0" />
          </font>
       </CheckBox>
    </children>
