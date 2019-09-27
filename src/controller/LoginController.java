@@ -70,7 +70,7 @@ public class LoginController implements Initializable {
     }
     
     public void logar() {
-        Conexao.login(tfUsuario.getText().trim(), tfSenha.getText().trim());
+        //Conexao.login(tfUsuario.getText().trim(), tfSenha.getText().trim());
         try {
             Principal p = new Principal();
             p.start(new Stage());

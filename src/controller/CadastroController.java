@@ -29,6 +29,7 @@ import javafx.scene.image.ImageView;
 import model.Link;
 import model.Notificacao;
 import model.TituloComparator;
+import model.TituloDoLink;
 
 /**
  * FXML Controller class
@@ -60,6 +61,9 @@ public class CadastroController implements Initializable {
     public static boolean foiTerminada;
     public static boolean estaSuspensa;
     public static boolean temporario = false;
+    TituloDoLink tituloLink = new TituloDoLink();
+    public static boolean fecharT1 = false;
+    public static boolean selecionado = false;
 
     /**
      * Initializes the controller class.
@@ -120,6 +124,7 @@ public class CadastroController implements Initializable {
             }
         });
         t.start();
+        
     }
 
     void suspend() {
@@ -135,7 +140,7 @@ public class CadastroController implements Initializable {
         this.estaSuspensa = false;
         notifyAll();
     }
-
+    
     public void adicionar() {
         Link temp = new Link(0, "", "", "", "");
         boolean r = Alerta.getAlertaConfirma("Confirmação Para Adicionar Link", "Deseja Realmente Adicionar o Novo Link?", "Escolha Uma Opção");
@@ -143,17 +148,14 @@ public class CadastroController implements Initializable {
             if (cbTemp.isSelected()) {
                 ImageView imagem = null;
                 if (tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
-                    imagem = PrincipalController.pegarIcone(tfLink.getText().trim());
-                    Conexao.getLinksTemp().add(new Link(Conexao.getContId(), tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim(), imagem));
-                    PrincipalController.tvLinksCompartilhado.refresh();
-                    Conexao.setContId(1);
+                    temp = new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim());
+                    Conexao.insertLinkTemporarios(temp);
                 } else {
                     String link = "www." + tfLink.getText().trim();
-                    imagem = PrincipalController.pegarIcone(link);
-                    Conexao.getLinksTemp().add(new Link(Conexao.getContId(), tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim(), imagem));
-                    PrincipalController.tvLinksCompartilhado.refresh();
-                    Conexao.setContId(1);
+                    temp = new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim());
+                    Conexao.insertLinkTemporarios(temp);
                 }
+                
             } else {
                 if (tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
                     temp = new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim());
@@ -163,11 +165,13 @@ public class CadastroController implements Initializable {
                     temp = new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim());
                     Conexao.insertLink(temp);
                 }
+                Notificacao.getNotificacaoAdd(temp.getTitulo().get());
             }
+            Notificacao.getNotificacaoAdd(temp.getTitulo().get());
         }
         PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
-        PrincipalController.getResultado().addAll(Conexao.getUsuarioAtual().getLinks());
-        Collections.sort(Conexao.getUsuarioAtual().getLinks(), new TituloComparator());
+        PrincipalController.getResultado().addAll(Conexao.getLinks());
+        Collections.sort(Conexao.getLinks(), new TituloComparator());
         PrincipalController.tvLinksCompartilhado.refresh();
         limpar();
     }
@@ -190,37 +194,20 @@ public class CadastroController implements Initializable {
         if (r) {
             //SE O LINK FOR DA LISTA DE TEMPORARIOS E FOR CONTINUAR COMO TEMPORARIO SÓ EDITA NA LISTA DE TEMPORARIOS
             if (cbTemp.isSelected() && temp) {
+                PrincipalController.linkEditar.setTituloString(tfTitulo.getText().trim());
+                PrincipalController.linkEditar.setCategoriaString(tfCategoria.getText().trim());
+                PrincipalController.linkEditar.setTagString(tfTag.getText().trim());
                 if (tfLink.getText().contains("www") || tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
-                    int c1 = 0;
-                    for (Link l : Conexao.getLinksTemp()) {
-                        if (l.getID().get() == PrincipalController.linkEditar.getID().get()) {
-                            Conexao.getLinksTemp().get(c1).setTituloString(tfTitulo.getText().trim());
-                            Conexao.getLinksTemp().get(c1).setLinkString(tfLink.getText().trim());
-                            Conexao.getLinksTemp().get(c1).setCategoriaString(tfCategoria.getText().trim());
-                            Conexao.getLinksTemp().get(c1).setTagString(tfTag.getText().trim());
-                            ImageView imagem = PrincipalController.pegarIcone(tfLink.getText().trim());
-                            Conexao.getLinksTemp().get(c1).setIcone(imagem);
-                            break;
-                        }
-                        c1++;
-                    }
+                    PrincipalController.linkEditar.setLinkString(tfLink.getText().trim());
+                    Conexao.atualizarLinkTemporario(PrincipalController.linkEditar);
                 } else {
-                    int c2 = 0;
-                    for (Link l : Conexao.getLinksTemp()) {
-                        if (l.getID().get() == PrincipalController.linkEditar.getID().get()) {
-                            String link = "www." + tfLink.getText().trim();
-                            Conexao.getLinksTemp().get(c2).setTituloString(tfTitulo.getText().trim());
-                            Conexao.getLinksTemp().get(c2).setLinkString(link);
-                            Conexao.getLinksTemp().get(c2).setCategoriaString(tfCategoria.getText().trim());
-                            Conexao.getLinksTemp().get(c2).setTagString(tfTag.getText().trim());
-                            ImageView imagem = PrincipalController.pegarIcone(link);
-                            Conexao.getLinksTemp().get(c2).setIcone(imagem);
-                            break;
-                        }
-                        c2++;
-                    }
+                    String link = "www." + tfLink.getText().trim();
+                    PrincipalController.linkEditar.setLinkString(link);
+                    Conexao.atualizarLinkTemporario(PrincipalController.linkEditar);
                 }
-                
+                PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
+                PrincipalController.getResultado().addAll(Conexao.getLinksTemp());
+                PrincipalController.tvLinksCompartilhado.refresh();
                 Notificacao.getNotificacaoEdit("O Link (Temporário): "+tfTitulo.getText().trim()+" Foi Editado Com Sucesso!!");
             } else if (!cbTemp.isSelected() && !temp) { //SE O LINK FOR DA LISTA DE SALVOS E FOR CONTINUAR NA LISTA DE SALVOS EDITA NO BANCO E NA LISTA DO USUARIO 
                 PrincipalController.linkEditar.setTituloString(tfTitulo.getText().trim());
@@ -234,12 +221,17 @@ public class CadastroController implements Initializable {
                     PrincipalController.linkEditar.setLinkString(link);
                     Conexao.atualizarLink(PrincipalController.linkEditar);
                 }
+                PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
+                PrincipalController.getResultado().addAll(Conexao.getLinks());
+                PrincipalController.tvLinksCompartilhado.refresh();
                 Notificacao.getNotificacaoEdit("O Link (Salvo): "+tfTitulo.getText().trim()+" Foi Editado Com Sucesso!!");
             } else if (!cbTemp.isSelected() && temp) { //SE O LINK FOR DA LISTA DE TEMPORARIOS E FOR MUDAR PRA LISTA DE SALVOS
                 int c2 = 0;
                 for (Link l : Conexao.getLinksTemp()) {
                     if (l.getID().get() == PrincipalController.linkEditar.getID().get()) {
-                        Conexao.getLinksTemp().remove(c2);
+                        Conexao.deletarLinkTemporario(l);
+                        getResultado().remove(0, PrincipalController.getResultado().size());
+                        getResultado().addAll(Conexao.getLinksTemp());
                         break;
                     }
                     c2++;
@@ -251,40 +243,34 @@ public class CadastroController implements Initializable {
                     Conexao.insertLink(new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim()));
                 }
                 PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
-                PrincipalController.getResultado().addAll(Conexao.getUsuarioAtual().getLinks());
+                PrincipalController.getResultado().addAll(Conexao.getLinks());
                 PrincipalController.tvLinksCompartilhado.refresh();
                 Notificacao.getNotificacaoEdit("O Link: "+tfTitulo.getText().trim()+" Foi Editado Pra (Salvo) Com Sucesso!!");
             } else if (cbTemp.isSelected() && !temp) { //SE O LINK FOR DA LISTA DE SALVOS E FOR MUDAR PRA LISTA DE TEMPORARIOS
                 int c1 = 0;
-                for (Link l : Conexao.getUsuarioAtual().getLinks()) {
+                for (Link l : Conexao.getLinks()) {
                     if (l.getID().get() == PrincipalController.linkEditar.getID().get()) {
                         Conexao.deletarLink(l);
                         getResultado().remove(0, PrincipalController.getResultado().size());
-                        getResultado().addAll(Conexao.getUsuarioAtual().getLinks());
+                        getResultado().addAll(Conexao.getLinks());
                         break;
                     }
                     c1++;
                 }
-                ImageView imagem = null;
                 if (tfLink.getText().contains("www") || tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
-                    imagem = PrincipalController.pegarIcone(tfLink.getText().trim());
-                    Conexao.getLinksTemp().add(new Link(Conexao.getContId(), tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim(), imagem));
-                    PrincipalController.tvLinksCompartilhado.refresh();
-                    Conexao.setContId(1);
+                    Conexao.insertLinkTemporarios(new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim()));
                 } else {
                     String link = "www." + tfLink.getText().trim();
-                    imagem = PrincipalController.pegarIcone(link);
-                    Conexao.getLinksTemp().add(new Link(Conexao.getContId(), tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim(), imagem));
-                    PrincipalController.tvLinksCompartilhado.refresh();
-                    Conexao.setContId(1);
+                    Conexao.insertLinkTemporarios(new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim()));
                 }
                 PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
-                PrincipalController.getResultado().addAll(Conexao.getUsuarioAtual().getLinks());
+                PrincipalController.getResultado().addAll(Conexao.getLinks());
                 PrincipalController.tvLinksCompartilhado.refresh();
                 Notificacao.getNotificacaoEdit("O Link: "+tfTitulo.getText().trim()+" Foi Editado Pra (Temporário) Com Sucesso!!");
             }
+            
             tabelaPrincipal.getSelectionModel().select(null);
-            Collections.sort(Conexao.getUsuarioAtual().getLinks(), new TituloComparator());
+            Collections.sort(Conexao.getLinks(), new TituloComparator());
             tabelaPrincipal.refresh();
             PrincipalController.adicionarPrincipal.setDisable(false);
             PrincipalController.editarPrincipal.setDisable(true);
@@ -354,7 +340,7 @@ public class CadastroController implements Initializable {
     }
 
     public void carregarElementos() {
-        lbUser.setText(lbUser.getText() + " " + Conexao.getUsuarioAtual().getNome().get());
+        //lbUser.setText(lbUser.getText() + " " + Conexao.getUsuarioAtual().getNome().get());
         if (PrincipalController.linkEditar.getLink().get().equals("")) {
             btnLimpar.setDisable(true);
             btnSalvar.setDisable(true);
@@ -399,7 +385,8 @@ public class CadastroController implements Initializable {
         } catch (IOException ex) {
             ex.printStackTrace();
         } catch (Exception ex) {
-            tfTitulo.setText("Erro ao pegar titulo automático");
+            tfTitulo.setText(tituloLink.pegarTitulo(obj.detectar()));
+            //tfTitulo.setText("Erro ao pegar titulo automático");
             //System.out.println("Não foi capaz de pegar o titulo");
         } finally {
             try {

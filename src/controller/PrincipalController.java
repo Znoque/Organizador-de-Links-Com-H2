@@ -22,6 +22,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -107,28 +108,24 @@ public class PrincipalController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        Conexao.criarTabelas();
+        Conexao.pegarLinks();
+        Conexao.pegarLinksTemporarios();
+        
         //INICIALIZANDO OBEJETOS E COMPONENTES
         tvLinksCompartilhado = tvLinks;
         adicionarPrincipal = btnAdicionar;
         editarPrincipal = btnEditar;
         removerPrincipal = btnRemover;
         
-        tBtn.setOnAction(e -> {
-            if(tBtn.getText().equals("Links Salvos")){
-                tBtn.setText("Links Temporários");
-                tBtn.setStyle("-fx-background-color: #FF4500;");
-                tvLinks.setItems(Conexao.getLinksTemp());
-            }else{
-                tBtn.setText("Links Salvos");
-                tBtn.setStyle("-fx-background-color: #FF8000;");
-                tvLinks.setItems(Conexao.getUsuarioAtual().getLinks());
-            }
-            limpar();
-        });
+        tfPesquisa.setDisable(true);
+        ckbAutomatico.setDisable(true);
         
-        carregarTabela(Conexao.getUsuarioAtual());
-        getResultado().addAll(Conexao.getUsuarioAtual().getLinks());
-        lbUsuario.setText(lbUsuario.getText() + " " + Conexao.getUsuarioAtual().getNome().get());
+        tBtn.setOnAction(e -> botaoAlternar());
+        
+        carregarTabela();
+        //getResultado().addAll(Conexao.getLinks());
+        //lbUsuario.setText(lbUsuario.getText() + " " + Conexao.getUsuarioAtual().getNome().get());
         SetBtns();
 
         //AÇÃO DOS BOTÕES
@@ -161,7 +158,7 @@ public class PrincipalController implements Initializable {
                 e.consume();
             }
         });
-
+        
         //FILTRO DE PESQUISA
         tfPesquisa.setOnKeyReleased(obj -> {
             tvLinks.getItems().clear();
@@ -182,17 +179,29 @@ public class PrincipalController implements Initializable {
             }).collect(toList()));
         });
 
-        //CARREGAMENTO DOS ICONES DOS LINKS NA TABELA
+        //THREAD RESPONSAVEL POR CARREGAR OS ICONES DOS LINKS NA INICIALIZAÇÃO
         new Thread(() -> {
             int cont = 0;
-            for (Link link : Conexao.getUsuarioAtual().getLinks()) {
+            int cont2 = 0;
+            for (Link link : Conexao.getLinks()) {
                 ImageView imagem = pegarIcone(link.getLink().get());
-                Conexao.getUsuarioAtual().getLinks().get(cont).setIcone(imagem);
+                Conexao.getLinks().get(cont).setIcone(imagem);
                 tvLinks.refresh();
                 cont++;
             }
+            for (Link link : Conexao.getLinksTemp()) {
+                ImageView imagem = pegarIcone(link.getLink().get());
+                Conexao.getLinksTemp().get(cont2).setIcone(imagem);
+                tvLinks.refresh();
+                cont2++;
+            }
+            tfPesquisa.setDisable(false);
+            ckbAutomatico.setDisable(false);
+            getResultado().addAll(Conexao.getLinks());
         }).start();
+        //FIM DA THREAD
         
+        //THREAD RESPONSAVEL POR MUDAR A COR DO CHECKBOX QUANDO SELECIONADO
         Thread t1 = new Thread(() -> {
             while (!fecharT1) {
                 try {
@@ -210,7 +219,9 @@ public class PrincipalController implements Initializable {
             }
         });
         t1.start();
+        //FIM DA THREAD
         
+        //THREAD RESPONSAVEL POR ADICIONAR OS LINKS AUTOMÁTICAMENTE
         Thread auto = new Thread(() -> {
             while (!fecharT1) {
                 try {
@@ -222,32 +233,54 @@ public class PrincipalController implements Initializable {
                                 System.out.println("Já adicionado");
                             } else {
                                 copiado = obj.detectar();
-                                titulotemp = tituloLink.pegarTitulo(obj.detectar());
-                                ImageView icone = pegarIcone(obj.detectar());
-                                Conexao.getLinksTemp().add(new Link(Conexao.getContId(), titulotemp, obj.detectar(), " ", " ", icone));
+                                titulotemp = tituloLink.pegarTitulo(copiado);
+                                ImageView icone = pegarIcone(copiado);
+                                Platform.runLater(() -> {
+                                    Conexao.insertLinkTemporarios(new Link(0, titulotemp, copiado, "", ""));
+                                    Notificacao.getNotificacaoAdd(titulotemp);
+                                });
                             }
                         }
                     } else{
                         //System.out.println("Não Selecionado");
                     }
-                    Thread.sleep(2000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         });
         auto.start();
+        //FIM DA THREAD T1
+        
+        //THREAD RESPONSAVEL POR HABILITAR E DESABILITAR O BOTÃO QUE ALTERNA ENTRE OS LINKS SALVOS E TEMPORARIOS
+        Thread t2 = new Thread(() -> {
+            while (!fecharT1) {
+                try {
+                    if (!tfPesquisa.getText().equals("")) {
+                        tBtn.setDisable(true);
+                    } else {
+                        tBtn.setDisable(false);
+                    }
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t2.start();
+        //FIM DA THREAD T2
     }
 
-    public void carregarTabela(Pessoa p) {
+    public void carregarTabela() {
         tcTitulo.setCellValueFactory(value -> value.getValue().getTitulo());
         tcLink.setCellValueFactory(value -> value.getValue().getLink());
         tcCategoria.setCellValueFactory(value -> value.getValue().getCategoria());
         tcTag.setCellValueFactory(value -> value.getValue().getTag());
         tcIcon.setCellValueFactory(new PropertyValueFactory<>("icone"));
-        Collections.sort(p.getLinks(), new TituloComparator());
-        Collections.sort(resultado, new TituloComparator());
-        tvLinks.setItems(p.getLinks());
+        Collections.sort(Conexao.getLinks(), new TituloComparator());
+        Collections.sort(Conexao.getLinksTemp(), new TituloComparator());
+        tvLinks.setItems(Conexao.getLinks());
     }
 
     public void SetBtns() {
@@ -255,7 +288,6 @@ public class PrincipalController implements Initializable {
         //COLOCANDO CURSOR DE MÃOS NOS BOTÕES
         btnAdicionar.setCursor(Cursor.HAND);
         btnEditar.setCursor(Cursor.HAND);
-        //btnPesquisa.setCursor(Cursor.HAND);
         btnTrocar.setCursor(Cursor.HAND);
         btnRemover.setCursor(Cursor.HAND);
 
@@ -275,7 +307,7 @@ public class PrincipalController implements Initializable {
 
     public void trocar() {
         Conexao.getLinksTemp().remove(0, Conexao.getLinksTemp().size());
-        Conexao.ZeraContId();
+        //Conexao.ZeraContId();
         Login m = new Login();
         try {
             m.start(new Stage());
@@ -289,11 +321,12 @@ public class PrincipalController implements Initializable {
     }
 
     public void limpar() {
+        tfPesquisa.setText("");
         tvLinks.getSelectionModel().select(null);
         btnEditar.setDisable(true);
         btnRemover.setDisable(true);
         btnAdicionar.setDisable(false);
-        Collections.sort(Conexao.getUsuarioAtual().getLinks(), new TituloComparator());
+        Collections.sort(Conexao.getLinks(), new TituloComparator());
         Collections.sort(resultado, new TituloComparator());
     }
 
@@ -317,6 +350,7 @@ public class PrincipalController implements Initializable {
                 }
                 
             }
+            ckbAutomatico.setDisable(true);
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/view/Cadastro.fxml"));
             AnchorPane layout = loader.load();
@@ -332,6 +366,7 @@ public class PrincipalController implements Initializable {
                 //estaSuspensa = true;
                 CadastroController.foiTerminada = true;
                 CadastroController.aberto = false;
+                ckbAutomatico.setDisable(false);
                 limpar();
             });
         } catch (IOException ex) {
@@ -343,22 +378,35 @@ public class PrincipalController implements Initializable {
         if(tBtn.getText().equals("Links Salvos")){
             Conexao.deletarLink(l);
             getResultado().remove(0, PrincipalController.getResultado().size());
-            getResultado().addAll(Conexao.getUsuarioAtual().getLinks());
+            getResultado().addAll(Conexao.getLinks());
+            Notificacao.getNotificacaoRemove(l.getTitulo().get());
             limpar();
         } else {
-            int c=0;
-            for (Link link : Conexao.getLinksTemp()) {
-                if (link.getID().get() == l.getID().get()) {
-                    Conexao.getLinksTemp().remove(c);
-                    break;
-                }
-                c++;
-            }
+            Conexao.deletarLinkTemporario(l);
+            getResultado().remove(0, PrincipalController.getResultado().size());
+            getResultado().addAll(Conexao.getLinksTemp());
+            Notificacao.getNotificacaoRemove(l.getTitulo().get());
             limpar();
-            tvLinks.refresh();
-            
         }
-        Collections.sort(Conexao.getUsuarioAtual().getLinks(), new TituloComparator());
+        Collections.sort(Conexao.getLinks(), new TituloComparator());
+        Collections.sort(Conexao.getLinksTemp(), new TituloComparator());
+    }
+    
+    public void botaoAlternar(){
+        if(tBtn.getText().equals("Links Salvos")){
+            tBtn.setText("Links Temporários");
+            tBtn.setStyle("-fx-background-color: #FF4500;");
+            resultado.remove(0, resultado.size());
+            resultado.addAll(Conexao.getLinksTemp());
+            tvLinks.setItems(Conexao.getLinksTemp());
+        }else{
+            tBtn.setText("Links Salvos");
+            tBtn.setStyle("-fx-background-color: #FF8000;");
+            resultado.remove(0, resultado.size());
+            resultado.addAll(Conexao.getLinks());
+            tvLinks.setItems(Conexao.getLinks());
+        }
+        limpar();
     }
 
     public static ImageView pegarIcone(String link) {

@@ -19,11 +19,6 @@
             <Button fx:id="btnSalvar" mnemonicParsing="false" style="-fx-background-color: #20A178;" text="Salvar" textFill="WHITE" />
          </buttons>
       </ButtonBar>
-      <Label fx:id="lbUser" layoutX="127.0" layoutY="55.0" text="Usuário:" textAlignment="CENTER" textFill="CHOCOLATE" wrapText="true" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="15.0">
-         <font>
-            <Font name="Berlin Sans FB" size="24.0" />
-         </font>
-      </Label>
       <GridPane layoutX="10.0" layoutY="48.0" prefHeight="258.0" prefWidth="376.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
