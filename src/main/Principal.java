@@ -37,10 +37,11 @@ public class Principal extends Application {
         stage.setOnCloseRequest(e -> {
             boolean r = Alerta.getAlertaSair();
             if (r) {
-                PrincipalController.fecharT1 = true;
-                CadastroController.estaSuspensa = false;
-                CadastroController.foiTerminada = true;
-                PrincipalController.getJanela().close();
+                System.exit(0);
+                //PrincipalController.fecharT1 = true;
+                //CadastroController.estaSuspensa = false;
+                //CadastroController.foiTerminada = true;
+                //PrincipalController.getJanela().close();
             } else {
                 e.consume();
             }

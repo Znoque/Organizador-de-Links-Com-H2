@@ -110,7 +110,12 @@ public class CadastroController implements Initializable {
                             tfLink.setText(obj.detectar());
                             copiado = obj.detectar();
                             new Thread(() -> {
-                                pegarTitulo(obj.detectar());
+                                try{
+                                     pegarTitulo(obj.detectar());
+                                } catch (Exception ex) {
+                                    //ex.printStackTrace();
+                                }
+                               
                             }).start();
                         }
                     }
@@ -371,6 +376,7 @@ public class CadastroController implements Initializable {
     public void pegarTitulo(String url) {
         InputStream response = null;
         Charset charset = Charset.forName("UTF8");
+        String titulo2;
         try {
 
             URLConnection connection = new URL(url).openConnection();
@@ -381,9 +387,14 @@ public class CadastroController implements Initializable {
             Scanner scanner = new Scanner(response);
             String responseBody = scanner.useDelimiter("\\A").next();
             String titulo = responseBody.substring(responseBody.indexOf("<title") + responseBody.substring(responseBody.indexOf("<title")).indexOf(">"), responseBody.indexOf("</title>"));
-            tfTitulo.setText(titulo);
+            /*if(titulo.contains(">")){
+                titulo.indexOf(>)
+            }*/
+            titulo2 = titulo.substring(1, titulo.length());
+            tfTitulo.setText(titulo2);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
+            tfTitulo.setText(tituloLink.pegarTitulo(obj.detectar()));
         } catch (Exception ex) {
             tfTitulo.setText(tituloLink.pegarTitulo(obj.detectar()));
             //tfTitulo.setText("Erro ao pegar titulo automático");

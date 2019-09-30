@@ -94,10 +94,12 @@ public class PrincipalController implements Initializable {
     public static Button editarPrincipal;
     private static ObservableList<Link> resultado = FXCollections.observableArrayList();
     public static Link linkEditar = new Link(0, "", "", "", "");
+    public static Link linkTitulo = new Link(0, "", "", "", "");
     private static Stage janela = new Stage();
     DetectarCopiaBy4Java obj = new DetectarCopiaBy4Java();
     public static String copiado = "";
     public static String titulo = "";
+    public static String titulo2 = "";
     public static boolean fecharT1 = false;
     public static boolean selecionado = false;
     TituloDoLink tituloLink = new TituloDoLink();
@@ -253,6 +255,40 @@ public class PrincipalController implements Initializable {
         auto.start();
         //FIM DA THREAD T1
         
+        //THREAD RESPONSAVEL POR EDITAR O TITULO DOS LINKS TEMPORARIOS
+        Thread autoTitulo = new Thread(() -> {
+            String t = "";
+            String novoTitulo = "";
+            while (!fecharT1) {
+                try {
+                    for(Link l: Conexao.getLinksTemp()){
+                        if(l.getTag().get().equals("")){
+                            t = l.getTitulo().get();
+                            try{
+                                novoTitulo = editarTitulo(l.getLink().get());
+                                linkTitulo = new Link(l.getID().get(), novoTitulo, l.getLink().get(), l.getCategoria().get(), l.getTitulo().get());
+                                Conexao.atualizarLinkTemporario(linkTitulo);
+                                tvLinks.refresh();
+                            } catch(NullPointerException ex){
+                                linkTitulo = new Link(l.getID().get(), l.getTitulo().get(), l.getLink().get(), l.getCategoria().get(), l.getTitulo().get());
+                                Conexao.atualizarLinkTemporario(linkTitulo);
+                                tvLinks.refresh();
+                            }
+                            System.out.println(novoTitulo);
+                        }
+                    }
+                    Thread.sleep(30000);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (foiTerminada) {
+                return;
+            }
+        });
+        autoTitulo.start();
+        //FIM DA THREAD T1
+        
         //THREAD RESPONSAVEL POR HABILITAR E DESABILITAR O BOTÃO QUE ALTERNA ENTRE OS LINKS SALVOS E TEMPORARIOS
         Thread t2 = new Thread(() -> {
             while (!fecharT1) {
@@ -350,6 +386,7 @@ public class PrincipalController implements Initializable {
                 }
                 
             }
+            tfPesquisa.setDisable(true);
             ckbAutomatico.setDisable(true);
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/view/Cadastro.fxml"));
@@ -363,10 +400,10 @@ public class PrincipalController implements Initializable {
             CadastroController.aberto = true;
 
             getJanela().setOnCloseRequest(item2 -> {
-                //estaSuspensa = true;
                 CadastroController.foiTerminada = true;
                 CadastroController.aberto = false;
                 ckbAutomatico.setDisable(false);
+                tfPesquisa.setDisable(false);
                 limpar();
             });
         } catch (IOException ex) {
@@ -440,7 +477,7 @@ public class PrincipalController implements Initializable {
         return resultado;
     }
     
-    public void pegarTitulo(String url) {
+    public String editarTitulo(String url) {
         InputStream response = null;
         Charset charset = Charset.forName("UTF8");
         try {
@@ -453,12 +490,14 @@ public class PrincipalController implements Initializable {
             Scanner scanner = new Scanner(response);
             String responseBody = scanner.useDelimiter("\\A").next();
             String titulo = responseBody.substring(responseBody.indexOf("<title") + responseBody.substring(responseBody.indexOf("<title")).indexOf(">"), responseBody.indexOf("</title>"));
-            titulotemp = titulo;
+            titulo2 = titulo.substring(1, titulo.length());
         } catch (IOException ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
+            titulo2 = tituloLink.pegarTitulo(obj.detectar());
         } catch (Exception ex) {
-            titulotemp = "Erro ao pegar titulo automático";
-            //System.out.println("Não foi capaz de pegar o titulo");
+            titulo2 = tituloLink.pegarTitulo(obj.detectar());
+            //tfTitulo.setText("Erro ao pegar titulo automático");
+            System.out.println("Não foi capaz de pegar o titulo");
         } finally {
             try {
                 response.close();
@@ -466,5 +505,6 @@ public class PrincipalController implements Initializable {
                 ex.printStackTrace();
             }
         }
+        return titulo2;
     }
 }
