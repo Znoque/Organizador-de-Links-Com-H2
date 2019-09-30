@@ -92,7 +92,7 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </ToggleButton>
-            <CheckBox fx:id="ckbAutomatico" layoutX="704.0" layoutY="16.0" mnemonicParsing="false" text="Adicionar Links Automatio" textFill="WHITE" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="15.0">
+            <CheckBox fx:id="ckbAutomatico" layoutX="704.0" layoutY="16.0" mnemonicParsing="false" text="Adicionar Links Automaticamente" textFill="WHITE" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="15.0">
                <font>
                   <Font name="System Bold" size="16.0" />
                </font>

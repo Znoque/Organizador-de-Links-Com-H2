@@ -170,9 +170,9 @@ public class CadastroController implements Initializable {
                     temp = new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim());
                     Conexao.insertLink(temp);
                 }
-                Notificacao.getNotificacaoAdd(temp.getTitulo().get());
+                //Notificacao.getNotificacaoAdd(temp.getTitulo().get());
             }
-            Notificacao.getNotificacaoAdd(temp.getTitulo().get());
+            Notificacao.getNotificacaoAdd("Link");
         }
         PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
         PrincipalController.getResultado().addAll(Conexao.getLinks());
@@ -213,7 +213,7 @@ public class CadastroController implements Initializable {
                 PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
                 PrincipalController.getResultado().addAll(Conexao.getLinksTemp());
                 PrincipalController.tvLinksCompartilhado.refresh();
-                Notificacao.getNotificacaoEdit("O Link (Temporário): "+tfTitulo.getText().trim()+" Foi Editado Com Sucesso!!");
+                //Notificacao.getNotificacaoEdit("O Link (Temporário): "+tfTitulo.getText().trim()+" Foi Editado Com Sucesso!!");
             } else if (!cbTemp.isSelected() && !temp) { //SE O LINK FOR DA LISTA DE SALVOS E FOR CONTINUAR NA LISTA DE SALVOS EDITA NO BANCO E NA LISTA DO USUARIO 
                 PrincipalController.linkEditar.setTituloString(tfTitulo.getText().trim());
                 PrincipalController.linkEditar.setCategoriaString(tfCategoria.getText().trim());
@@ -229,7 +229,7 @@ public class CadastroController implements Initializable {
                 PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
                 PrincipalController.getResultado().addAll(Conexao.getLinks());
                 PrincipalController.tvLinksCompartilhado.refresh();
-                Notificacao.getNotificacaoEdit("O Link (Salvo): "+tfTitulo.getText().trim()+" Foi Editado Com Sucesso!!");
+                //Notificacao.getNotificacaoEdit("O Link (Salvo): "+tfTitulo.getText().trim()+" Foi Editado Com Sucesso!!");
             } else if (!cbTemp.isSelected() && temp) { //SE O LINK FOR DA LISTA DE TEMPORARIOS E FOR MUDAR PRA LISTA DE SALVOS
                 int c2 = 0;
                 for (Link l : Conexao.getLinksTemp()) {
@@ -250,7 +250,7 @@ public class CadastroController implements Initializable {
                 PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
                 PrincipalController.getResultado().addAll(Conexao.getLinks());
                 PrincipalController.tvLinksCompartilhado.refresh();
-                Notificacao.getNotificacaoEdit("O Link: "+tfTitulo.getText().trim()+" Foi Editado Pra (Salvo) Com Sucesso!!");
+                //Notificacao.getNotificacaoEdit("O Link: "+tfTitulo.getText().trim()+" Foi Editado Pra (Salvo) Com Sucesso!!");
             } else if (cbTemp.isSelected() && !temp) { //SE O LINK FOR DA LISTA DE SALVOS E FOR MUDAR PRA LISTA DE TEMPORARIOS
                 int c1 = 0;
                 for (Link l : Conexao.getLinks()) {
@@ -271,15 +271,17 @@ public class CadastroController implements Initializable {
                 PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
                 PrincipalController.getResultado().addAll(Conexao.getLinks());
                 PrincipalController.tvLinksCompartilhado.refresh();
-                Notificacao.getNotificacaoEdit("O Link: "+tfTitulo.getText().trim()+" Foi Editado Pra (Temporário) Com Sucesso!!");
+                //Notificacao.getNotificacaoEdit("O Link: "+tfTitulo.getText().trim()+" Foi Editado Pra (Temporário) Com Sucesso!!");
             }
-            
+            Notificacao.getNotificacaoEdit("O Link Foi Editado Com Sucesso!!");
             tabelaPrincipal.getSelectionModel().select(null);
             Collections.sort(Conexao.getLinks(), new TituloComparator());
             tabelaPrincipal.refresh();
             PrincipalController.adicionarPrincipal.setDisable(false);
             PrincipalController.editarPrincipal.setDisable(true);
             PrincipalController.removerPrincipal.setDisable(true);
+            PrincipalController.tfPesquisaPrincipal.setDisable(false);
+            PrincipalController.ckbPrincipal.setDisable(false);
             aberto = false;
             PrincipalController.getJanela().close();
         }

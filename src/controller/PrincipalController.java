@@ -92,6 +92,8 @@ public class PrincipalController implements Initializable {
     public static Button adicionarPrincipal;
     public static Button removerPrincipal;
     public static Button editarPrincipal;
+    public static TextField tfPesquisaPrincipal;
+    public static CheckBox ckbPrincipal;
     private static ObservableList<Link> resultado = FXCollections.observableArrayList();
     public static Link linkEditar = new Link(0, "", "", "", "");
     public static Link linkTitulo = new Link(0, "", "", "", "");
@@ -119,7 +121,9 @@ public class PrincipalController implements Initializable {
         adicionarPrincipal = btnAdicionar;
         editarPrincipal = btnEditar;
         removerPrincipal = btnRemover;
-        
+        tfPesquisaPrincipal = tfPesquisa;
+        ckbPrincipal = ckbAutomatico;
+                
         tfPesquisa.setDisable(true);
         ckbAutomatico.setDisable(true);
         
@@ -416,15 +420,16 @@ public class PrincipalController implements Initializable {
             Conexao.deletarLink(l);
             getResultado().remove(0, PrincipalController.getResultado().size());
             getResultado().addAll(Conexao.getLinks());
-            Notificacao.getNotificacaoRemove(l.getTitulo().get());
+            //Notificacao.getNotificacaoRemove(l.getTitulo().get());
             limpar();
         } else {
             Conexao.deletarLinkTemporario(l);
             getResultado().remove(0, PrincipalController.getResultado().size());
             getResultado().addAll(Conexao.getLinksTemp());
-            Notificacao.getNotificacaoRemove(l.getTitulo().get());
+            //Notificacao.getNotificacaoRemove(l.getTitulo().get());
             limpar();
         }
+        Notificacao.getNotificacaoRemove("Link");
         Collections.sort(Conexao.getLinks(), new TituloComparator());
         Collections.sort(Conexao.getLinksTemp(), new TituloComparator());
     }
