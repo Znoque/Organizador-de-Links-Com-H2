@@ -42,14 +42,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import main.Login;
 import main.Principal;
 import model.Alerta;
 import model.Conexao;
 import model.Link;
 import model.ManipulandoData;
 import model.Notificacao;
-import model.Pessoa;
 import model.TituloComparator;
 import model.TituloDoLink;
 
@@ -60,8 +58,6 @@ import model.TituloDoLink;
  */
 public class PrincipalController implements Initializable {
 
-    @FXML
-    private Button btnTrocar;
     @FXML
     private Label lbUsuario;
     @FXML
@@ -138,7 +134,6 @@ public class PrincipalController implements Initializable {
         SetBtns();
 
         //AÇÃO DOS BOTÕES
-        btnTrocar.setOnAction(value -> trocar());
         btnAdicionar.setOnMouseClicked(e -> cadastro("Adicionar"));
         btnEditar.setOnMouseClicked(e -> cadastro("Editar"));
         btnRemover.setOnAction(e -> deletar(tvLinks.getSelectionModel().getSelectedItem()));
@@ -331,7 +326,6 @@ public class PrincipalController implements Initializable {
         //COLOCANDO CURSOR DE MÃOS NOS BOTÕES
         btnAdicionar.setCursor(Cursor.HAND);
         btnEditar.setCursor(Cursor.HAND);
-        btnTrocar.setCursor(Cursor.HAND);
         btnRemover.setCursor(Cursor.HAND);
 
         //DESABILITANDO BOTÕES DE EDITAR E EXCLUIR
@@ -345,21 +339,6 @@ public class PrincipalController implements Initializable {
             d.browse(new URI(url));
         } catch (Exception e) {
             Alerta.getAlertaErro("Erro Ao Abrir Link", "Erro Ao Abrir Link", "Não Foi Possivel Abrir o Link, Verifique o Link Ou a Sua Conexão Com a Internet");
-        }
-    }
-
-    public void trocar() {
-        Conexao.getLinksTemp().remove(0, Conexao.getLinksTemp().size());
-        //Conexao.ZeraContId();
-        Login m = new Login();
-        try {
-            m.start(new Stage());
-            getJanela().close();
-            CadastroController.aberto = false;
-            Principal.getStage().close();
-
-        } catch (Exception e) {
-            Alerta.getAletaTrocar();
         }
     }
 

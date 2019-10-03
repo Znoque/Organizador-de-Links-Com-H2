@@ -308,7 +308,8 @@ public class Conexao {
             }
             
             // PASSO 5: Verifica se o link tem 15 dias
-            System.out.println("Antes");
+            verificarContador();
+            /*System.out.println("Antes");
             System.out.println("------------------------------------------------");
             for(Link l: getLinksTemp()){
                 System.out.println("Titulo: " + l.getTitulo().get() + ", Link: " + l.getLink() + ", Dada Adicionado: " + l.getDataAdd() + ", Data da Ultima Verificacao: " + l.getDataUltima() + ", Contador: " + l.getContador());
@@ -320,7 +321,7 @@ public class Conexao {
             for(Link l: getLinksTemp()){
                 System.out.println("Titulo: " + l.getTitulo().get() + ", Link: " + l.getLink() + ", Dada Adicionado: " + l.getDataAdd() + ", Data da Ultima Verificacao: " + l.getDataUltima() + ", Contador: " + l.getContador());
             }
-            System.out.println("------------------------------------------------");
+            System.out.println("------------------------------------------------");*/
                     
             // PASSO 6: Ambiente de limpeza
             rs.close();
