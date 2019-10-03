@@ -47,6 +47,7 @@ import main.Principal;
 import model.Alerta;
 import model.Conexao;
 import model.Link;
+import model.ManipulandoData;
 import model.Notificacao;
 import model.Pessoa;
 import model.TituloComparator;
@@ -106,6 +107,8 @@ public class PrincipalController implements Initializable {
     public static boolean selecionado = false;
     TituloDoLink tituloLink = new TituloDoLink();
     String titulotemp = "";
+    public ManipulandoData mData = new ManipulandoData();
+    public String dataAtual = mData.getDataAtual();
 
     /**
      * Initializes the controller class.
@@ -242,7 +245,7 @@ public class PrincipalController implements Initializable {
                                 titulotemp = tituloLink.pegarTitulo(copiado);
                                 ImageView icone = pegarIcone(copiado);
                                 Platform.runLater(() -> {
-                                    Conexao.insertLinkTemporarios(new Link(0, titulotemp, copiado, "", ""));
+                                    Conexao.insertLinkTemporarios(new Link(0, titulotemp, copiado, "", "", dataAtual, dataAtual, 0));
                                     Notificacao.getNotificacaoAdd(titulotemp);
                                 });
                             }
@@ -270,11 +273,11 @@ public class PrincipalController implements Initializable {
                             t = l.getTitulo().get();
                             try{
                                 novoTitulo = editarTitulo(l.getLink().get());
-                                linkTitulo = new Link(l.getID().get(), novoTitulo, l.getLink().get(), l.getCategoria().get(), l.getTitulo().get());
+                                linkTitulo = new Link(l.getID().get(), novoTitulo, l.getLink().get(), l.getCategoria().get(), l.getTitulo().get(), l.getDataAdd(), l.getDataUltima(), l.getContador());
                                 Conexao.atualizarLinkTemporario(linkTitulo);
                                 tvLinks.refresh();
                             } catch(NullPointerException ex){
-                                linkTitulo = new Link(l.getID().get(), l.getTitulo().get(), l.getLink().get(), l.getCategoria().get(), l.getTitulo().get());
+                                linkTitulo = new Link(l.getID().get(), l.getTitulo().get(), l.getLink().get(), l.getCategoria().get(), l.getTitulo().get(), l.getDataAdd(), l.getDataUltima(), l.getContador());
                                 Conexao.atualizarLinkTemporario(linkTitulo);
                                 tvLinks.refresh();
                             }

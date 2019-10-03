@@ -27,6 +27,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import model.Link;
+import model.ManipulandoData;
 import model.Notificacao;
 import model.TituloComparator;
 import model.TituloDoLink;
@@ -64,7 +65,8 @@ public class CadastroController implements Initializable {
     TituloDoLink tituloLink = new TituloDoLink();
     public static boolean fecharT1 = false;
     public static boolean selecionado = false;
-
+    public ManipulandoData mData = new ManipulandoData();
+    public String dataAtual = mData.getDataAtual();
     /**
      * Initializes the controller class.
      */
@@ -153,21 +155,21 @@ public class CadastroController implements Initializable {
             if (cbTemp.isSelected()) {
                 ImageView imagem = null;
                 if (tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
-                    temp = new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim());
+                    temp = new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim(), dataAtual, dataAtual, 0);
                     Conexao.insertLinkTemporarios(temp);
                 } else {
                     String link = "www." + tfLink.getText().trim();
-                    temp = new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim());
+                    temp = new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim(), dataAtual, dataAtual, 0);
                     Conexao.insertLinkTemporarios(temp);
                 }
                 
             } else {
                 if (tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
-                    temp = new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim());
+                    temp = new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim(), dataAtual, dataAtual, 0);
                     Conexao.insertLink(temp);
                 } else {
                     String link = "www." + tfLink.getText().trim();
-                    temp = new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim());
+                    temp = new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim(), dataAtual, dataAtual, 0);
                     Conexao.insertLink(temp);
                 }
                 //Notificacao.getNotificacaoAdd(temp.getTitulo().get());
@@ -202,6 +204,9 @@ public class CadastroController implements Initializable {
                 PrincipalController.linkEditar.setTituloString(tfTitulo.getText().trim());
                 PrincipalController.linkEditar.setCategoriaString(tfCategoria.getText().trim());
                 PrincipalController.linkEditar.setTagString(tfTag.getText().trim());
+                PrincipalController.linkEditar.setDataAdd(dataAtual);
+                PrincipalController.linkEditar.setDataUltima(dataAtual);
+                PrincipalController.linkEditar.setContador(0);
                 if (tfLink.getText().contains("www") || tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
                     PrincipalController.linkEditar.setLinkString(tfLink.getText().trim());
                     Conexao.atualizarLinkTemporario(PrincipalController.linkEditar);
@@ -263,10 +268,10 @@ public class CadastroController implements Initializable {
                     c1++;
                 }
                 if (tfLink.getText().contains("www") || tfLink.getText().contains("https://") || tfLink.getText().contains("http://")) {
-                    Conexao.insertLinkTemporarios(new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim()));
+                    Conexao.insertLinkTemporarios(new Link(1, tfTitulo.getText().trim(), tfLink.getText().trim(), tfCategoria.getText().trim(), tfTag.getText().trim(), dataAtual, dataAtual, 0));
                 } else {
                     String link = "www." + tfLink.getText().trim();
-                    Conexao.insertLinkTemporarios(new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim()));
+                    Conexao.insertLinkTemporarios(new Link(1, tfTitulo.getText().trim(), link, tfCategoria.getText().trim(), tfTag.getText().trim(), dataAtual, dataAtual, 0));
                 }
                 PrincipalController.getResultado().remove(0, PrincipalController.getResultado().size());
                 PrincipalController.getResultado().addAll(Conexao.getLinks());

@@ -23,6 +23,10 @@ public class Link {
     private StringProperty categoria = new SimpleStringProperty();
     private StringProperty tag = new SimpleStringProperty();
     private ImageView icone;
+    private String dataAdd;
+    private String dataUltima;
+    private int contador;
+    
 
     public Link(int id, String titulo, String link, String categoria, String tag, ImageView icone) {
         this.ID.set(id);
@@ -41,6 +45,31 @@ public class Link {
         this.link.set(link);
         this.categoria.set(categoria);
         this.tag.set(tag);
+    }
+    
+    public Link(int id, String titulo, String link, String categoria, String tag, ImageView icone, String dataAdd, String dataUltima, int contador) {
+        this.ID.set(id);
+        this.titulo.set(titulo);
+        this.link.set(link);
+        this.categoria.set(categoria);
+        this.tag.set(tag);
+        icone.setFitHeight(20);
+        icone.setFitWidth(20);
+        this.icone = icone;
+        this.dataAdd = dataAdd;
+        this.dataUltima = dataUltima;
+        this.contador = contador;
+    }
+    
+    public Link(int id, String titulo, String link, String categoria, String tag, String dataAdd, String dataUltima, int contador) {
+        this.ID.set(id);
+        this.titulo.set(titulo);
+        this.link.set(link);
+        this.categoria.set(categoria);
+        this.tag.set(tag);
+        this.dataAdd = dataAdd;
+        this.dataUltima = dataUltima;
+        this.contador = contador;
     }
     
     @Override
@@ -148,6 +177,52 @@ public class Link {
         icone.setFitHeight(20);
         icone.setFitWidth(20);
         this.icone = icone;
+    }
+
+    /**
+     * @return the dataAdd
+     */
+    public String getDataAdd() {
+        return dataAdd;
+    }
+    
+    /**
+     * @param dataAdd the dataUltima to set
+     */
+    public void setDataAdd(String dataAdd) {
+        this.dataAdd = dataAdd;
+    }
+    
+    /**
+     * @return the dataUltima
+     */
+    public String getDataUltima() {
+        return dataUltima;
+    }
+
+    /**
+     * @param dataUltima the dataUltima to set
+     */
+    public void setDataUltima(String dataUltima) {
+        this.dataUltima = dataUltima;
+    }
+
+    /**
+     * @return the contador
+     */
+    public int getContador() {
+        return contador;
+    }
+
+    /**
+     * @param contador the contador to set
+     */
+    public void setContador(int contador) {
+        this.contador = contador;
+    }
+    
+    public void incrementaContador() {
+        this.contador +=1;
     }
 
 }

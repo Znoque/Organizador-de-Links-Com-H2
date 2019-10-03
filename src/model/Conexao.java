@@ -10,6 +10,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
+import java.util.Date;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.ImageView;
@@ -28,6 +30,9 @@ public class Conexao {
     private static ObservableList<Link> links = FXCollections.observableArrayList();
     private static ObservableList<Link> linksTemp = FXCollections.observableArrayList();
     //private static int contId = 1;
+    private static ManipulandoData mData = new ManipulandoData();
+    private static Date dataAtual = new Date();
+    private static String dataAtualString = mData.getDataAtual();
     
     public static boolean login() {
         if (usuario.equals("") && senha.equals("")) {
@@ -39,6 +44,20 @@ public class Conexao {
         return false;
     }
     
+    private static void verificarContador(){
+        for(Link l: getLinksTemp()){
+            if(l.getContador()<15){
+                if(!l.getDataUltima().equals(dataAtualString)){
+                    l.incrementaContador();
+                    l.setDataUltima(dataAtualString);
+                }
+            }else{
+                deletarLinkTemporario(l);
+            }
+        }
+    }
+    //Collections.sort(Conexao.getLinks(), new TituloComparator());
+    //Collections.sort(Conexao.getLinksTemp(), new TituloComparator());
     /*public static boolean login(String user, String pass) {
         if (user.equals(usuario) && pass.equals(senha)) {
             usuarioAtual = new Pessoa(1, usuario, senha);
@@ -84,6 +103,9 @@ public class Conexao {
                     + " link VARCHAR(255) NOT NULL UNIQUE, "
                     + " categoria VARCHAR(255), "
                     + " tag VARCHAR(255), "
+                    + " dataAdicionado VARCHAR(255) NOT NULL, "
+                    + " dataUltimaVerificacao VARCHAR(255) NOT NULL, "
+                    + " contador Integer NOT NULL, "
                     + " PRIMARY KEY ( id ))";
             stmt.executeUpdate(sql);
             System.out.println("Tabela criada no banco de dados com sucesso!!");
@@ -135,6 +157,7 @@ public class Conexao {
 
             // PASSO 4: Ambiente de limpeza
             pegarUltimo(l);
+            Collections.sort(getLinks(), new TituloComparator());
             stmt.close();
             conn.close();
         } catch (SQLException se) {
@@ -162,7 +185,7 @@ public class Conexao {
     }
 
     public static void insertLinkTemporarios(Link l) {
-        String inserir = "INSERT INTO temporarios VALUES (default, '" + l.getTitulo().get() + "', '" + l.getLink().get() + "', '" + l.getCategoria().get() + "', '" + l.getTag().get() + "')";
+        String inserir = "INSERT INTO temporarios VALUES (default, '" + l.getTitulo().get() + "', '" + l.getLink().get() + "', '" + l.getCategoria().get() + "', '" + l.getTag().get() + "', '" + l.getDataAdd() + "', '" + l.getDataUltima()+ "', '" + l.getContador() + "')";
         Connection conn = null;
         Statement stmt = null;
         try {
@@ -181,6 +204,7 @@ public class Conexao {
 
             // PASSO 4: Ambiente de limpeza
             pegarUltimoTemporarios(l);
+            Collections.sort(getLinksTemp(), new TituloComparator());
             stmt.close();
             conn.close();
         } catch (SQLException se) {
@@ -280,10 +304,25 @@ public class Conexao {
 
             // PASSO 4: Extrair dados do conjunto de resultados 
             while (rs.next()) {
-                getLinksTemp().add(new Link(rs.getInt("id"), rs.getString("titulo"), rs.getString("link"), rs.getString("categoria"), rs.getString("tag")));
+                getLinksTemp().add(new Link(rs.getInt("id"), rs.getString("titulo"), rs.getString("link"), rs.getString("categoria"), rs.getString("tag"), rs.getString("dataAdicionado"), rs.getString("dataUltimaVerificacao"), rs.getInt("contador")));
             }
-
-            // PASSO 5: Ambiente de limpeza
+            
+            // PASSO 5: Verifica se o link tem 15 dias
+            System.out.println("Antes");
+            System.out.println("------------------------------------------------");
+            for(Link l: getLinksTemp()){
+                System.out.println("Titulo: " + l.getTitulo().get() + ", Link: " + l.getLink() + ", Dada Adicionado: " + l.getDataAdd() + ", Data da Ultima Verificacao: " + l.getDataUltima() + ", Contador: " + l.getContador());
+            }
+            System.out.println("------------------------------------------------");
+            verificarContador();
+            System.out.println("Depois");
+            System.out.println("------------------------------------------------");
+            for(Link l: getLinksTemp()){
+                System.out.println("Titulo: " + l.getTitulo().get() + ", Link: " + l.getLink() + ", Dada Adicionado: " + l.getDataAdd() + ", Data da Ultima Verificacao: " + l.getDataUltima() + ", Contador: " + l.getContador());
+            }
+            System.out.println("------------------------------------------------");
+                    
+            // PASSO 6: Ambiente de limpeza
             rs.close();
             stmt.close();
             conn.close();
@@ -458,6 +497,7 @@ public class Conexao {
             System.out.println("Link atualizado com sucesso na tabela...");
 
             // PASSO 4: Ambiente de limpeza
+            Collections.sort(getLinks(), new TituloComparator());
             stmt.close();
             conn.close();
         } catch (SQLException se) {
@@ -490,7 +530,7 @@ public class Conexao {
         Statement stmt = null;
         Link linkAntigo = null;
         int c = 0;
-        String sql = "UPDATE temporarios " + "SET titulo = '" + l.getTitulo().get() + "', link = '" + l.getLink().get() + "', categoria = '" + l.getCategoria().get() + "', tag = '" + l.getTag().get() + "' WHERE id in (" + l.getID().get() + ")";
+        String sql = "UPDATE temporarios " + "SET titulo = '" + l.getTitulo().get() + "', link = '" + l.getLink().get() + "', categoria = '" + l.getCategoria().get() + "', tag = '" + l.getTag().get() + "', dataAdicionado = '" + l.getDataAdd() + "', dataUltimaVerificacao = '" + l.getDataUltima() + "', contador = '" + l.getContador() + "' WHERE id in (" + l.getID().get() + ")";
         try {
             // PASSO 1: Registrar o driver JDBC 
             Class.forName(driver);
@@ -521,6 +561,7 @@ public class Conexao {
             System.out.println("Link atualizado com sucesso na tabela...");
 
             // PASSO 4: Ambiente de limpeza
+            Collections.sort(getLinksTemp(), new TituloComparator());
             stmt.close();
             conn.close();
         } catch (SQLException se) {
@@ -623,7 +664,7 @@ public class Conexao {
             // PASSO 4: Extrair dados do conjunto de resultados  
             while (rs.next()) {
                 image = pegarIcone(rs.getString("link"));
-                getLinksTemp().add(new Link(rs.getInt("id"), rs.getString("titulo"), rs.getString("link"), rs.getString("categoria"), rs.getString("tag"), image));
+                getLinksTemp().add(new Link(rs.getInt("id"), rs.getString("titulo"), rs.getString("link"), rs.getString("categoria"), rs.getString("tag"), image, rs.getString("dataAdicionado"), rs.getString("dataUltimaVerificacao"), rs.getInt("contador")));
             }
 
             // PASSO 5: Ambiente de limpeza 
