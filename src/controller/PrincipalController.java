@@ -41,6 +41,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import main.Principal;
 import model.Alerta;
@@ -74,6 +75,8 @@ public class PrincipalController implements Initializable {
     @FXML
     private TableColumn<Link, String> tcTag;
     @FXML
+    private HBox hBxButtons;
+    @FXML
     private TextField tfPesquisa;
     @FXML
     private Button btnAdicionar;
@@ -105,12 +108,16 @@ public class PrincipalController implements Initializable {
     String titulotemp = "";
     public ManipulandoData mData = new ManipulandoData();
     public String dataAtual = mData.getDataAtual();
+    boolean disableAdd = false;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        ckbAutomatico.setDisable(true);  
+        tfPesquisa.setDisable(true);
+        
         Conexao.criarTabelas();
         Conexao.pegarLinks();
         Conexao.pegarLinksTemporarios();
@@ -122,9 +129,6 @@ public class PrincipalController implements Initializable {
         removerPrincipal = btnRemover;
         tfPesquisaPrincipal = tfPesquisa;
         ckbPrincipal = ckbAutomatico;
-                
-        tfPesquisa.setDisable(true);
-        ckbAutomatico.setDisable(true);
         
         tBtn.setOnAction(e -> botaoAlternar());
         
@@ -142,12 +146,12 @@ public class PrincipalController implements Initializable {
         tvLinks.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
                 abrirLink(tvLinks.getSelectionModel().getSelectedItem().getLink().get());
-                limpar();
+                limpar2();
             } else {
                 try {
+                    btnAdicionar.setDisable(true);
                     btnEditar.setDisable(false);
                     btnRemover.setDisable(false);
-                    btnAdicionar.setDisable(true);
 
                     linkEditar.setID(tvLinks.getSelectionModel().getSelectedItem().getID());
                     linkEditar.setTituloString(tvLinks.getSelectionModel().getSelectedItem().getTitulo().get());
@@ -155,9 +159,9 @@ public class PrincipalController implements Initializable {
                     linkEditar.setCategoriaString(tvLinks.getSelectionModel().getSelectedItem().getCategoria().get());
                     linkEditar.setTagString(tvLinks.getSelectionModel().getSelectedItem().getTag().get());
                 } catch (NullPointerException ex) {
+                    btnAdicionar.setDisable(false);
                     btnEditar.setDisable(true);
                     btnRemover.setDisable(true);
-                    btnAdicionar.setDisable(false);
                 }
                 e.consume();
             }
@@ -199,8 +203,8 @@ public class PrincipalController implements Initializable {
                 tvLinks.refresh();
                 cont2++;
             }
-            tfPesquisa.setDisable(false);
             ckbAutomatico.setDisable(false);
+            tfPesquisa.setDisable(false);
             getResultado().addAll(Conexao.getLinks());
         }).start();
         //FIM DA THREAD
@@ -297,8 +301,10 @@ public class PrincipalController implements Initializable {
                 try {
                     if (!tfPesquisa.getText().equals("")) {
                         tBtn.setDisable(true);
+                        ckbAutomatico.setDisable(true);
                     } else {
                         tBtn.setDisable(false);
+                        ckbAutomatico.setDisable(false);
                     }
                     Thread.sleep(300);
                 } catch (InterruptedException e) {
@@ -344,6 +350,15 @@ public class PrincipalController implements Initializable {
 
     public void limpar() {
         tfPesquisa.setText("");
+        tvLinks.getSelectionModel().select(null);
+        btnEditar.setDisable(true);
+        btnRemover.setDisable(true);
+        btnAdicionar.setDisable(false);
+        Collections.sort(Conexao.getLinks(), new TituloComparator());
+        Collections.sort(resultado, new TituloComparator());
+    }
+    
+    public void limpar2() {
         tvLinks.getSelectionModel().select(null);
         btnEditar.setDisable(true);
         btnRemover.setDisable(true);
